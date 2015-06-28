@@ -46,109 +46,12 @@
 #include <fenv.h>
 #include "write_conserved.hpp"
 #include "constants.hpp"
+#include "wind.hpp"
 
 using namespace std;
 using namespace simulation2d;
 
 namespace {
-
-#ifdef BLA_BLA_BLA
-  class RadiativeCooling: public SourceTerm
-  {
-  public:
-
-    RadiativeCooling(const double particle_mass,
-		     const double boltzmann_constant,
-		     const double cooling_coefficient):
-      particle_mass_(particle_mass),
-      boltzmann_constant_(boltzmann_constant),
-      cooling_coefficient_(cooling_coefficient) {}
-
-    vector<Extensive> operator()
-    (const Tessellation& tess,
-     const PhysicalGeometry& /*pg*/,
-     const CacheData& cd,
-     const vector<ComputationalCell>& cells,
-     const vector<Extensive>& /*fluxes*/,
-     const vector<Vector2D>& /*point_velocities*/,
-     const double /*time*/) const
-    {
-      vector<Extensive> res(static_cast<size_t>(tess.GetPointNo()));
-      for(size_t i=0;i<res.size();++i){
-	res[i].mass = 0;
-	res[i].momentum.x = 0;
-	res[i].momentum.y = 0;
-	res[i].energy = 
-	  calcTemperature(cells[i].density, cells[i].pressure) > 5e4 ?
-	  -cd.volumes[i]*calcEmissivity(cells[i].density,
-					cells[i].pressure) : 0;
-      }
-      return res;
-    }
-
-  private:
-    double calcTemperature(double density, double pressure) const
-    {
-      return particle_mass_*(pressure/density)/boltzmann_constant_;
-    }
-
-    double calcEmissivity(double density, double /*pressure*/) const
-    {
-      //      const double T = calcTemperature(density, pressure);
-      const double n = (density/particle_mass_);
-      return cooling_coefficient_*pow(n,2);
-    }
-
-    const double particle_mass_;
-    const double boltzmann_constant_;
-    const double cooling_coefficient_;
-  };
-#endif
-
-  class Wind: public SourceTerm
-  {
-  public:
-    Wind(const double& specific_mass_loss,
-	 const double& speed,
-	 const double& mass2thermal,
-	 const double& radius):
-      specific_mass_loss_(specific_mass_loss),
-      speed_(speed),
-      mass2thermal_(mass2thermal),
-      radius_(radius) {}
-
-    vector<Extensive> operator()
-    (const Tessellation& tess,
-     const PhysicalGeometry& /*pg*/,
-     const CacheData& cd,
-     const vector<ComputationalCell>& /*cells*/,
-     const vector<Extensive>& /*fluxes*/,
-     const vector<Vector2D>& /*point_velocities*/,
-     const double /*time*/) const
-    {
-      vector<Extensive> res(static_cast<size_t>(tess.GetPointNo()));
-      for(size_t i=0;i<res.size();++i){
-	res[i].mass = 0;
-	res[i].momentum = Vector2D(0,0);
-	res[i].energy = 0;
-	const Vector2D r = tess.GetMeshPoint(static_cast<int>(i));
-	if(abs(r)<radius_){
-	  res[i].mass = specific_mass_loss_*cd.volumes[i];
-	  res[i].momentum = res[i].mass*speed_*r/abs(r);
-	  res[i].energy = 
-	    0.5*ScalarProd(res[i].momentum,res[i].momentum)/res[i].mass+
-	    res[i].mass*mass2thermal_;
-	}
-      }
-      return res;
-    }
-
-  private:
-    const double specific_mass_loss_;
-    const double speed_;
-    const double mass2thermal_;
-    const double radius_;
-  };
 
   class Supernova: public Manipulate
   {
