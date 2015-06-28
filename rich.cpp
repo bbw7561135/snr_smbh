@@ -45,97 +45,12 @@
 #include "source/misc/horner.hpp"
 #include <fenv.h>
 #include "write_conserved.hpp"
+#include "constants.hpp"
 
 using namespace std;
 using namespace simulation2d;
 
 namespace {
-
-  class Constants
-  {
-  public:
-
-    // Metric prefix
-    const double kilo;
-    const double centi;
-
-    // Length / distance
-    const double parsec;
-    const double meter;
-
-    // Time
-    const double year;
-    const double second;
-
-    // Mass
-    const double solar_mass;
-    const double gram;
-
-    // Energy
-    const double erg;
-
-    // Force
-    const double newton;
-
-    // Parameters
-    const double boltzmann_constant;
-    const double proton_mass;
-    const double black_hole_mass;
-    const double zeta;
-    const double adiabatic_index;
-    const double gravitation_constant;
-    const double rho_0;
-    const double R_0;
-    const double omega_in;
-    const double inner_density_prefactor;
-    const double R_b;
-    const double omega_out;
-    const double outer_density_prefactor;
-    const double offset;
-    const double supernova_energy;
-    const double supernova_radius;
-    const double supernova_volume;
-    const double supernova_mass;
-    const double supernova_density;
-    const double supernova_pressure;
-    const Vector2D lower_left;
-    const Vector2D upper_right;
-
-    Constants(void):
-      kilo(1e3),
-      centi(1e-2),
-      parsec(1),
-      meter(3.24e-17*parsec),
-      year(1),
-      second(year/3.16e7),
-      solar_mass(1),
-      gram(5.03e-34*solar_mass),
-      erg(gram*pow(centi*meter/second,2)),
-      newton(kilo*gram*meter/pow(second,2)),
-      boltzmann_constant(1.38e-16*erg),
-      proton_mass(1.67e-24*gram),
-      black_hole_mass(1e7*solar_mass),
-      zeta(pow(black_hole_mass/(4.3e6*solar_mass),7./15.)),
-      adiabatic_index(5./3.),
-      gravitation_constant(6.673e-11*newton*pow(meter/(kilo*gram),2)),
-      rho_0(2.2e-22*gram/pow(centi*meter,3)),
-      R_0(0.04*parsec*zeta),
-      omega_in(1),
-      inner_density_prefactor(rho_0*pow(R_0,omega_in)),
-      R_b(0.4*parsec*zeta),
-      omega_out(3),
-      outer_density_prefactor
-      (inner_density_prefactor*pow(R_b,omega_out-omega_in)),
-      offset(0.6*R_b),
-      supernova_energy(1e51*erg),
-      supernova_radius(0.1*offset),
-      supernova_volume((4.*M_PI/3)*pow(supernova_radius,3)),
-      supernova_mass(5*solar_mass),
-      supernova_density(supernova_mass/supernova_volume),
-      supernova_pressure((adiabatic_index-1)*supernova_energy/supernova_volume),
-      lower_left(parsec*Vector2D(0,-40)),
-      upper_right(parsec*Vector2D(40,40)) {}
-  };
 
 #ifdef BLA_BLA_BLA
   class RadiativeCooling: public SourceTerm
@@ -926,14 +841,6 @@ public:
   SimData(const Constants& c):
    pg_(Vector2D(0,0), Vector2D(0,1)),
     outer_(c.lower_left, c.upper_right),
-    /*
-      init_points_(rectangle_clip
-      (centered_logarithmic_spiral(0.001,
-      abs(c.upper_right-c.lower_left),
-      0.005*2,
-      Vector2D(-0.01*c.offset,0)),
-      c.lower_left, c.upper_right)),
-    */
     init_points_(rectangle_clip
 		 (complete_grid(0.1*c.parsec,
 				abs(c.upper_right-c.lower_left),
@@ -1069,9 +976,9 @@ namespace {
 
   void my_main_loop(hdsim& sim, const Constants& c)
   {
-    const double tf = 50e3*c.year;
+    const double tf = 1e3*c.year;
     SafeTimeTermination term_cond_raw(tf,1e6);
-    ConsecutiveSnapshots diag1(new ConstantTimeInterval(tf/1000),
+    ConsecutiveSnapshots diag1(new ConstantTimeInterval(tf/10),
 			       new Rubric("snapshot_",".h5"));
     WriteTime diag2("time.txt");
     WriteConserved diag4("conserved.txt");
