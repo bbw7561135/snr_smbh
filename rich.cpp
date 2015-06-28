@@ -28,7 +28,6 @@
 #include "source/newtonian/two_dimensional/interpolations/linear_gauss_consistent.hpp"
 #include "source/newtonian/test_2d/consecutive_snapshots.hpp"
 #include <boost/foreach.hpp>
-//#include "source/newtonian/two_dimensional/hydro_boundary_conditions/FreeFlow.hpp"
 #include "source/misc/utils.hpp"
 #include "source/tessellation/shape_2d.hpp"
 #include "source/newtonian/test_2d/piecewise.hpp"
@@ -51,31 +50,13 @@
 #include "source/tessellation/right_rectangle.hpp"
 #include "source/newtonian/test_2d/clip_grid.hpp"
 #include "hexagonal_grid.hpp"
+#include "logarithmic_spiral.hpp"
+#include "sink_flux.hpp"
 
 using namespace std;
 using namespace simulation2d;
 
 namespace {
-
-  vector<Vector2D> centered_logarithmic_spiral(double r_min,
-					       double r_max,
-					       double alpha,
-					       const Vector2D& center)
-  {
-    const double theta_max = log(r_max/r_min)/alpha;
-    const vector<double> theta_list = 
-      arange(0,theta_max,2*M_PI*alpha/(1-0.5*alpha));
-  
-    vector<double> r_list(theta_list.size(),0);
-    for(size_t i=0;i<r_list.size();++i)
-      r_list.at(i) = r_min*exp(alpha*theta_list.at(i));
-  
-    vector<Vector2D> res(r_list.size());
-    for(size_t i=0;i<res.size();++i)
-      res[i] = center+r_list[i]*Vector2D(cos(theta_list.at(i)),
-					 sin(theta_list.at(i)));
-    return res;
-  }
 
   vector<Vector2D> complete_grid(double r_inner,
 				 double r_outer,
@@ -91,30 +72,6 @@ namespace {
 				  Vector2D(0,0));
     return join(inner, outer);
   }
-
-  /*
-  template<class T> class VectorInitializer
-  {
-  public:
-
-    VectorInitializer(const T& t):
-      buf_(1,t) {}
-
-    VectorInitializer& operator()(const T& t)
-    {
-      buf_.push_back(t);
-      return *this;
-    }
-
-    vector<T> operator()(void)
-    {
-      return buf_;
-    }
-
-  private:
-    vector<T> buf_;
-  };
-  */
 
   vector<ComputationalCell> calc_init_cond(const Tessellation& tess,
 					   const Constants& c,
@@ -138,165 +95,6 @@ namespace {
     }
     return res;
   }
-
-  double calc_tracer_flux(const Edge& edge,
-			  const Tessellation& tess,
-			  const vector<ComputationalCell>& cells,
-			  const string& name,
-			  const Conserved& hf)
-  {
-    if(hf.Mass>0 && 
-       edge.neighbors.first>0 && 
-       edge.neighbors.first<tess.GetPointNo())
-      return hf.Mass*
-	cells[static_cast<size_t>(edge.neighbors.first)].tracers.find(name)->second;
-    if(hf.Mass<0 && 
-       edge.neighbors.second>0 && 
-       edge.neighbors.second<tess.GetPointNo())
-      return hf.Mass*
-	cells[static_cast<size_t>(edge.neighbors.second)].tracers.find(name)->second;
-    return 0;    
-  }
-
-  class SinkFlux: public FluxCalculator
-  {
-  public:
-
-    SinkFlux(const RiemannSolver& rs):
-      rs_(rs) {}
-
-    vector<Extensive> operator()
-    (const Tessellation& tess,
-     const vector<Vector2D>& point_velocities,
-     const vector<ComputationalCell>& cells,
-     const EquationOfState& eos,
-     const double /*time*/,
-     const double /*dt*/) const
-    {
-      vector<Extensive> res(tess.getAllEdges().size());
-      for(size_t i=0;i<tess.getAllEdges().size();++i){
-	const Conserved hydro_flux =
-	  calcHydroFlux(tess, point_velocities,
-			cells, eos, i);
-	res[i].mass = hydro_flux.Mass;
-	res[i].momentum = hydro_flux.Momentum;
-	res[i].energy = hydro_flux.Energy;
-	for(std::map<std::string,double>::const_iterator it =
-	      cells.front().tracers.begin();
-	    it!=cells.front().tracers.end();++it)
-	  res[i].tracers[it->first] =
-	    calc_tracer_flux(tess.getAllEdges()[i],
-			     tess,cells,it->first,hydro_flux);
-	     
-      }
-      return res;
-    }
-
-  private:
-    const RiemannSolver& rs_;
-
-    const Conserved calcHydroFlux
-    (const Tessellation& tess,
-     const vector<Vector2D>& point_velocities,
-     const vector<ComputationalCell>& cells,
-     const EquationOfState& eos,
-     const size_t i) const
-    {
-      const Edge& edge = tess.GetEdge(static_cast<int>(i));
-      const std::pair<bool,bool> flags
-	(edge.neighbors.first>=0 && edge.neighbors.first<tess.GetPointNo(),
-	 edge.neighbors.second>=0 && edge.neighbors.second<tess.GetPointNo());
-      assert(flags.first || flags.second);
-      if(!flags.first){
-	const size_t right_index = 
-	  static_cast<size_t>(edge.neighbors.second);
-	const ComputationalCell& right_cell = cells[right_index];
-	if(right_cell.stickers.find("dummy")->second)
-	  return Conserved();
-	const Vector2D p = Parallel(edge);
-	const Primitive right = convert_to_primitive(right_cell,eos);
-	//	const Primitive left = reflect(right,p);
-	const Primitive left = right;
-	const Vector2D n = remove_parallel_component
-	  (tess.GetMeshPoint(edge.neighbors.second) - 
-	   edge.vertices.first, p);
-	return rotate_solve_rotate_back
-	  (rs_, left, right, 0, n, p);
-      }
-      if(!flags.second){
-	const size_t left_index = 
-	  static_cast<size_t>(edge.neighbors.first);
-	const ComputationalCell& left_cell = cells[left_index];
-	if(left_cell.stickers.find("dummy")->second)
-	  return Conserved();
-	const Primitive left = convert_to_primitive(left_cell, eos);
-	const Vector2D p = Parallel(edge);
-	//	const Primitive right = reflect(left,p);
-	const Primitive right = left;
-	const Vector2D n = remove_parallel_component
-	  (edge.vertices.second - 
-	   tess.GetMeshPoint(edge.neighbors.first), p);
-	return rotate_solve_rotate_back
-	  (rs_, left, right, 0, n, p);
-      }
-      const size_t left_index =
-	static_cast<size_t>(edge.neighbors.first);
-      const size_t right_index =
-	static_cast<size_t>(edge.neighbors.second);
-      const ComputationalCell& left_cell = cells[left_index];
-      const ComputationalCell& right_cell = cells[right_index];
-      if(left_cell.stickers.find("dummy")->second && 
-	 right_cell.stickers.find("dummy")->second)
-	return Conserved();
-      const Vector2D p = Parallel(edge);
-      const Vector2D n = 
-	tess.GetMeshPoint(edge.neighbors.second) - 
-	tess.GetMeshPoint(edge.neighbors.first);
-      const double velocity = Projection
-	(tess.CalcFaceVelocity
-	 (point_velocities[left_index],
-	  point_velocities[right_index],
-	  tess.GetCellCM(edge.neighbors.first),
-	  tess.GetCellCM(edge.neighbors.second),
-	  calc_centroid(edge)),n);			   
-      if(left_cell.stickers.find("dummy")->second){
-	const Primitive right = 
-	  convert_to_primitive(right_cell, eos);
-	ComputationalCell ghost;
-	ghost.density = right.Density/100;
-	ghost.pressure = right.Pressure/100;
-	ghost.velocity = Vector2D(0,0);
-	const Primitive left = convert_to_primitive(ghost,eos);
-	  /*
-	  ScalarProd(n,right.Velocity) < 0 ? right : 
-	  reflect(right,p);
-	  */
-	return rotate_solve_rotate_back
-	  (rs_,left,right,velocity,n,p);
-      }
-      if(right_cell.stickers.find("dummy")->second){
-	const Primitive left = 
-	  convert_to_primitive(left_cell, eos);
-	ComputationalCell ghost;
-	ghost.density = left.Density/100;
-	ghost.pressure = left.Pressure/100;
-	ghost.velocity = Vector2D(0,0);
-	const Primitive right = convert_to_primitive(ghost,eos);
-	  /*
-	  ScalarProd(n,left.Velocity)>0 ?
-	  left : reflect(left,p);
-	  */
-	return rotate_solve_rotate_back
-	  (rs_,left,right,velocity,n,p);
-      }
-      const Primitive left = 
-	convert_to_primitive(left_cell, eos);
-      const Primitive right =
-	convert_to_primitive(right_cell, eos);
-      return rotate_solve_rotate_back
-	(rs_,left,right,velocity,n,p);
-    }
-  };
 
   class TimeStepCalculator: public LazyList<double>
   {
