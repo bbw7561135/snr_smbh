@@ -49,29 +49,13 @@
 #include "supernova.hpp"
 #include "source/tessellation/right_rectangle.hpp"
 #include "source/newtonian/test_2d/clip_grid.hpp"
-#include "hexagonal_grid.hpp"
-#include "logarithmic_spiral.hpp"
+#include "complete_grid.hpp"
 #include "sink_flux.hpp"
 
 using namespace std;
 using namespace simulation2d;
 
 namespace {
-
-  vector<Vector2D> complete_grid(double r_inner,
-				 double r_outer,
-				 double alpha)
-  {
-    const vector<Vector2D> inner = 
-      centered_hexagonal_grid(r_inner*alpha*2*M_PI,
-			      r_inner);
-    const vector<Vector2D> outer =
-      centered_logarithmic_spiral(r_inner,
-				  r_outer,
-				  alpha,
-				  Vector2D(0,0));
-    return join(inner, outer);
-  }
 
   vector<ComputationalCell> calc_init_cond(const Tessellation& tess,
 					   const Constants& c,
