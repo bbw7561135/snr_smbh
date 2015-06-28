@@ -47,12 +47,14 @@
 #include "write_conserved.hpp"
 #include "constants.hpp"
 #include "wind.hpp"
+#include "supernova.hpp"
 
 using namespace std;
 using namespace simulation2d;
 
 namespace {
 
+  /*
   class Supernova: public Manipulate
   {
   public:
@@ -90,129 +92,7 @@ namespace {
     const double pressure_;
     const double time_;
     mutable bool spent_;
-  };
-
-  /*
-  class RadiativeCooling2: public Manipulate
-  {
-
-  public:
-
-    RadiativeCooling2(const double particle_mass,
-		      const double boltzmann_constant,
-		      const double T_min,
-		      const double T_max,
-		      const vector<double>& coefs,
-		      const double cfu):
-      particle_mass_(particle_mass),
-      boltzmann_constant_(boltzmann_constant),
-      T_min_(T_min), T_max_(T_max), coefs_(coefs),
-      cfu_(cfu), t_prev_(0) {}
-
-    void operator()(hdsim& sim)
-    {
-      const double dt = sim.getTime() - t_prev_;
-      t_prev_ = sim.getTime();
-      vector<ComputationalCell>& cells = sim.getAllCells();
-      for(size_t i=0;i<cells.size();++i){
-	ComputationalCell& cell = cells[i];
-	const double n = cell.density/particle_mass_;
-	const double temperature = min(T_max_, cell.pressure/(boltzmann_constant_*n));
-	if(temperature<T_min_)
-	  continue;
-	const double min_pressure = T_min_*boltzmann_constant_*n;
-	const double cooling_coefficient = cfu_*exp(horner(coefs_,log(temperature)));
-	cell.pressure = 
-	  max(min_pressure,cell.pressure-dt*cooling_coefficient*pow(n,2));
-	cell.tracers["entropy"] = sim.getEos().dp2s(cell.density,
-						      cell.pressure);
-      }
-      sim.recalculateExtensives();
-    }
-
-  private:
-    const double particle_mass_;
-    const double boltzmann_constant_;
-    const double T_min_;
-    const double T_max_;
-    const vector<double> coefs_;
-    const double cfu_;
-    mutable double t_prev_;
-  };
-  */
-
-  /*
-  class HydrostaticPressure: public SpatialDistribution
-  {
-  public:
-
-    HydrostaticPressure(double gm,
-			double r0,
-			double rho_0,
-			double omega_1,
-			double R_b,
-			double omega_2):
-      gm_(gm), r0_(r0), rho_0_(rho_0),
-      omega_1_(omega_1), R_b_(R_b), omega_2_(omega_2) {}
-
-    double operator()(const Vector2D& r) const
-    {
-      if(abs(r)<R_b_)
-	return (gm_/r0_)*(rho_0_/(omega_1_+1))*pow(abs(r)/r0_,-omega_1_-1)-
-	  (gm_/r0_)*(rho_0_/(omega_1_+1))*pow(R_b_/r0_,-omega_1_-1)+
-	  (gm_/r0_)*(rho_0_/(omega_2_+1))*pow(R_b_/r0_,-omega_1_-1);
-      else
-	return (gm_/r0_)*(rho_0_/(omega_2_+1))*
-	  pow(R_b_/r0_,-omega_1_-1)*
-	  pow(abs(r)/R_b_,-omega_2_-1);
-    }
-
-  private:
-    const double gm_;
-    const double r0_;
-    const double rho_0_;
-    const double omega_1_;
-    const double R_b_;
-    const double omega_2_;
-  };
-  */
-
-  /*
-  class BoundedRadialPowerLaw: public SpatialDistribution
-  {
-  public:
-
-    BoundedRadialPowerLaw(const Vector2D& center,
-			  double index,
-			  double prefactor,
-			  double lower_bound,
-			  double upper_bound,
-			  double min_val):
-      center_(center),
-      index_(index),
-      prefactor_(prefactor),
-      lower_bound_(lower_bound),
-      upper_bound_(upper_bound),
-      min_val_(min_val) {}
-
-    double operator()(const Vector2D& r) const
-    {
-      const double radius = max(min(abs(r-center_),
-				    upper_bound_),
-				lower_bound_);
-      return max(min_val_,
-		 prefactor_*pow(radius,index_));
-    }
-
-  private:
-    const Vector2D center_;
-    const double index_;
-    const double prefactor_;
-    const double lower_bound_;
-    const double upper_bound_;
-    const double min_val_;
-  };
-  */
+    };*/
 
   bool is_inside_rectangle(const Vector2D& point,
 			   const Vector2D& lower_left,
