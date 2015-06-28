@@ -48,105 +48,13 @@
 #include "constants.hpp"
 #include "wind.hpp"
 #include "supernova.hpp"
+#include "source/tessellation/right_rectangle.hpp"
+#include "source/newtonian/test_2d/clip_grid.hpp"
 
 using namespace std;
 using namespace simulation2d;
 
 namespace {
-
-  /*
-  class Supernova: public Manipulate
-  {
-  public:
-
-    Supernova(const Circle& hot_spot,
-	      const double& mass,
-	      const double& energy,
-	      const double& time):
-      hot_spot_(hot_spot),
-      density_(mass/pow(hot_spot.getRadius(),3)),
-      pressure_(energy/pow(hot_spot.getRadius(),3)),
-      time_(time),
-      spent_(false) {}
-
-    void operator()(hdsim& sim)
-    {
-      if(time_>sim.getTime() || spent_)
-	return;
-      spent_ = true;
-      vector<ComputationalCell>& cells = sim.getAllCells();
-      for(size_t i=0;i<cells.size();++i){
-	const Vector2D r = sim.getTessellation().GetMeshPoint(static_cast<int>(i));
-	if(hot_spot_(r)){
-	  ComputationalCell& cell = cells[i]; 
-	  cell.density = density_;
-	  cell.pressure = pressure_;
-	}
-      }
-      sim.recalculateExtensives();
-    }
-
-  private:
-    const Circle hot_spot_;
-    const double density_;
-    const double pressure_;
-    const double time_;
-    mutable bool spent_;
-    };*/
-
-  bool is_inside_rectangle(const Vector2D& point,
-			   const Vector2D& lower_left,
-			   const Vector2D& upper_right)
-  {
-    return ((point.x > lower_left.x) &&
-	    (point.x < upper_right.x) &&
-	    (point.y > lower_left.y) &&
-	    (point.y < upper_right.y));
-  }
-
-  vector<Vector2D> rectangle_clip(const vector<Vector2D>& grid,
-				  const Vector2D& lower_left,
-				  const Vector2D& upper_right)
-  {
-    vector<Vector2D> res;
-    for(size_t i=0, endp=grid.size();i<endp;++i){
-      const Vector2D& point = grid[i];
-      if(is_inside_rectangle(point,lower_left,upper_right))
-	res.push_back(point);	 
-    }
-    return res;
-  }
-
-  /*
-    vector<double> calc_radius_list(void)
-    {
-    const double rmin = 1e-4;
-    const double q = 1.01;
-    const size_t n = 200;
-    vector<double> res(n);
-    for(size_t i=0;i<n;++i)
-    res[i] = rmin*pow(q,i);
-    write_number(0,"finished_calc_radius_list.txt");
-    return res;
-    }
-  */
-
-  /*
-    vector<Vector2D> create_grid(Vector2D const& lower_left,
-    Vector2D const& upper_right,
-    double dx2x)
-    {
-    vector<Vector2D> res;
-    for(double x = lower_left.x*(1+0.5*dx2x);
-    x<upper_right.x; x*=(1+dx2x)){
-    const double dx = x*dx2x;
-    for(double y=lower_left.y+dx/2;
-    y<upper_right.y; y += dx)
-    res.push_back(Vector2D(x,y));
-    }
-    return res;
-    }
-  */
 
   vector<Vector2D> centered_hexagonal_grid(double r_min,
 					   double r_max)
@@ -624,11 +532,11 @@ public:
   SimData(const Constants& c):
    pg_(Vector2D(0,0), Vector2D(0,1)),
     outer_(c.lower_left, c.upper_right),
-    init_points_(rectangle_clip
-		 (complete_grid(0.1*c.parsec,
+    init_points_(clip_grid
+		 (RightRectangle(c.lower_left+Vector2D(0.001,0), c.upper_right),
+		  complete_grid(0.1*c.parsec,
 				abs(c.upper_right-c.lower_left),
-				0.005*2),
-		  c.lower_left+Vector2D(0.001,0), c.upper_right)),
+				0.005*2))),
     tess_(init_points_, outer_),
     eos_(c.adiabatic_index),
     rs_(),
