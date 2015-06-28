@@ -44,82 +44,12 @@
 #include "source/misc/vector_initialiser.hpp"
 #include "source/misc/horner.hpp"
 #include <fenv.h>
+#include "write_conserved.hpp"
 
 using namespace std;
 using namespace simulation2d;
 
 namespace {
-
-  /*
-    class CellEdgesGetter: public LazyList<Edge>
-    {
-    public:
-    CellEdgesGetter(const Tessellation& tess,
-    const int n):
-    tess_(tess), edge_indices_(tess_.GetCellEdges(n)) {}
-
-    size_t size(void) const
-    {
-    return edge_indices_.size();
-    }
-
-    Edge operator[](size_t i) const
-    {
-    return tess_.GetEdge(edge_indices_[i]);
-    }
-
-    private:
-    const Tessellation& tess_;
-    const vector<int> edge_indices_;
-    };
-  */
-
-  class WriteConserved: public DiagnosticFunction
-  {
-  public:
-
-    WriteConserved(const string& fname):
-      cons_(), fname_(fname) {}
-
-    void operator()(const hdsim& sim)
-    {
-      Extensive buf;
-      buf.mass = 0;
-      buf.momentum.x = 0;
-      buf.momentum.y = 0;
-      buf.energy = 0;
-      //      buf.tracers["ejecta"] = 0;
-      for(size_t i=0;i<sim.getAllExtensives().size();++i){
-	if(sim.getAllCells()[i].stickers.find("dummy")->second){
-	  const Extensive& temp = sim.getAllExtensives()[i];
-	  buf.mass += temp.mass;
-	  buf.momentum += temp.momentum;
-	  buf.energy += temp.energy;
-	  //	  buf.tracers["ejecta"] += temp.tracers.find("ejecta")->second;
-	}
-      }
-      cons_.push_back(buf);
-      time_.push_back(sim.getTime());
-    }
-
-    ~WriteConserved(void)
-    {
-      ofstream f(fname_.c_str());
-      for(size_t i=0;i<cons_.size();++i)
-	f << time_[i] << " "
-	  << cons_[i].mass << " "
-	  << cons_[i].momentum.x << " "
-	  << cons_[i].momentum.y << " "
-	  << cons_[i].energy << "\n";
-	  //	  << cons_[i].tracers.find("ejecta")->second << "\n";
-      f.close();
-    }
-
-  private:
-    mutable vector<Extensive> cons_;
-    mutable vector<double> time_;
-    const string fname_;
-  };
 
   class Constants
   {
