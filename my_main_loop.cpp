@@ -13,11 +13,11 @@ using namespace simulation2d;
 
 void my_main_loop(hdsim& sim, const Constants& c)
 {
-  const double tf = 1e2*c.year;
+  const double tf = 50e3*c.year;
   SafeTimeTermination term_cond_raw(tf,1e6);
   MultipleDiagnostics diag
     (VectorInitialiser<DiagnosticFunction*>()
-     (new ConsecutiveSnapshots(new ConstantTimeInterval(tf/10),
+     (new ConsecutiveSnapshots(new ConstantTimeInterval(tf/1000),
 			       new Rubric("snapshot_",".h5"),
 			       vector<DiagnosticAppendix*>
 			       (1,new TemperatureAppendix(c.proton_mass/c.boltzmann_constant))))

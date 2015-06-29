@@ -3,6 +3,8 @@
 
 #include "source/newtonian/two_dimensional/time_step_function.hpp"
 
+using std::string;
+
 class LogCFL: public TimeStepFunction
 {
 public:
