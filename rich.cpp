@@ -38,27 +38,12 @@
 #include "edge_length_calculator.hpp"
 #include "sim_data.hpp"
 #include "source/newtonian/test_2d/multiple_diagnostics.hpp"
+#include "write_cycle.hpp"
 
 using namespace std;
 using namespace simulation2d;
 
 namespace {
-
-  class WriteCycle: public DiagnosticFunction
-  {
-  public:
-
-    WriteCycle(const string& fname):
-      fname_(fname) {}
-
-    void operator()(const hdsim& sim)
-    {
-      write_number(sim.getCycle(),fname_);
-    }
-
-  private:
-    const string fname_;
-  };
 
   void my_main_loop(hdsim& sim, const Constants& c)
   {
