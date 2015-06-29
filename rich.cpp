@@ -1,23 +1,13 @@
 #include <iostream>
 #include <cmath>
 #include <limits>
-#include "source/tessellation/static_voronoi_mesh.hpp"
-#include "source/newtonian/two_dimensional/hdsim2d.hpp"
 #include "source/newtonian/two_dimensional/interpolations/pcm2d.hpp"
 #include "source/newtonian/two_dimensional/spatial_distributions/uniform2d.hpp"
-#include "source/newtonian/common/ideal_gas.hpp"
-#include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
 #include "source/newtonian/two_dimensional/hydro_boundary_conditions/RigidWallHydro.hpp"
-#include "source/newtonian/common/hllc.hpp"
 #include "source/newtonian/two_dimensional/source_terms/zero_force.hpp"
-#include "source/newtonian/two_dimensional/point_motions/eulerian.hpp"
 #include "source/newtonian/two_dimensional/point_motions/lagrangian.hpp"
-#include "source/newtonian/two_dimensional/point_motions/eulerian.hpp"
 #include "source/newtonian/two_dimensional/point_motions/round_cells.hpp"
 #include "source/newtonian/two_dimensional/diagnostics.hpp"
-#include "source/newtonian/two_dimensional/source_terms/cylindrical_complementary.hpp"
-#include "source/newtonian/two_dimensional/source_terms/CenterGravity.hpp"
-#include "source/newtonian/two_dimensional/source_terms/SeveralSources.hpp"
 #include "source/misc/simple_io.hpp"
 #include "source/newtonian/test_2d/main_loop_2d.hpp"
 #include "source/newtonian/test_2d/kill_switch.hpp"
@@ -40,101 +30,16 @@
 #include "source/newtonian/two_dimensional/diagnostics.hpp"
 #include "source/newtonian/two_dimensional/simple_flux_calculator.hpp"
 #include "source/newtonian/two_dimensional/simple_cell_updater.hpp"
-#include "source/misc/vector_initialiser.hpp"
 #include "source/misc/horner.hpp"
 #include <fenv.h>
 #include "write_conserved.hpp"
 #include "constants.hpp"
-#include "wind.hpp"
 #include "supernova.hpp"
-#include "source/tessellation/right_rectangle.hpp"
-#include "source/newtonian/test_2d/clip_grid.hpp"
-#include "complete_grid.hpp"
-#include "sink_flux.hpp"
-#include "calc_init_cond.hpp"
-#include "log_cfl.hpp"
-#include "entropy_fix.hpp"
 #include "edge_length_calculator.hpp"
-#include "lazy_extensive_updater.hpp"
+#include "sim_data.hpp"
 
 using namespace std;
 using namespace simulation2d;
-
-class SimData
-{
-
-public:
-
-  SimData(const Constants& c):
-   pg_(Vector2D(0,0), Vector2D(0,1)),
-    outer_(c.lower_left, c.upper_right),
-    init_points_(clip_grid
-		 (RightRectangle(c.lower_left+Vector2D(0.001,0), c.upper_right),
-		  complete_grid(0.1*c.parsec,
-				abs(c.upper_right-c.lower_left),
-				0.005*2))),
-    tess_(init_points_, outer_),
-    eos_(c.adiabatic_index),
-    rs_(),
-    //    raw_point_motion_(),
-    //    point_motion_(raw_point_motion_,eos_),
-    alt_point_motion_(),
-    gravity_acc_(c.gravitation_constant*c.black_hole_mass,
-		 0.001*c.parsec,
-		 c.parsec*Vector2D(0,0)),
-    gravity_force_(gravity_acc_),
-    geom_force_(pg_.getAxis()),
-    wind_(1e-3*c.solar_mass/c.year/(4.*M_PI*pow(0.4*c.parsec,3)/3.),
-	  1e3*c.kilo*c.meter/c.second,
-	  c.boltzmann_constant*1e4/(5./3.-1)/c.proton_mass,
-	  0.4*c.parsec),
-    force_(VectorInitialiser<SourceTerm*>(&gravity_force_)(&wind_)(&geom_force_)()),
-  //    force_(VectorInitializer<SourceTerm*>(&gravity_force_)()),
-    tsf_(0.3, "dt_log.txt",c.gravitation_constant*c.black_hole_mass),
-    fc_(rs_),
-    eu_(tess_,pg_),
-    cu_(),
-    sim_(tess_,
-	 outer_,
-	 pg_,
-	 calc_init_cond(tess_,c,eos_),
-	 eos_,
-	 alt_point_motion_,
-	 force_,
-	 tsf_,
-	 fc_,
-	 eu_,
-	 cu_) {}
-
-  hdsim& getSim(void)
-  {
-    return sim_;
-  }
-  
-private:
-  const CylindricalSymmetry pg_;
-  const SquareBox outer_;
-  const vector<Vector2D> init_points_;
-  StaticVoronoiMesh tess_;
-  const IdealGas eos_;
-  const Hllc rs_;
-  //  Lagrangian raw_point_motion_;
-  //  RoundCells point_motion_;
-  Eulerian alt_point_motion_;
-  CenterGravity gravity_acc_;
-  ConservativeForce gravity_force_;
-  CylindricalComplementary geom_force_;
-  Wind wind_;
-  //  RadiativeCooling rad_cool_;
-  SeveralSources force_;
-  //  const SimpleCFL tsf_;
-  const LogCFL tsf_;
-  const SinkFlux fc_;
-  //const SimpleCellUpdater cu_;
-  const LazyExtensiveUpdater eu_;
-  const EntropyFix cu_;
-  hdsim sim_;
-};
 
 class CustomDiagnostic
 {
