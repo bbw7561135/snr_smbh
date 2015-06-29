@@ -37,56 +37,10 @@
 #include "supernova.hpp"
 #include "edge_length_calculator.hpp"
 #include "sim_data.hpp"
+#include "source/newtonian/test_2d/multiple_diagnostics.hpp"
 
 using namespace std;
 using namespace simulation2d;
-
-class CustomDiagnostic
-{
-public:
-
-  CustomDiagnostic(double dt,
-		   double t_start):
-    dt_(dt),
-    t_next_(t_start),
-    counter_(0) {}
-
-  void operator()(const hdsim& sim)
-  {
-    if(sim.getTime()>t_next_){
-      write_snapshot_to_hdf5(sim, "snapshot_"+int2str(counter_)+".h5");
-
-      t_next_ += dt_;
-      ++counter_;
-    }
-  }
-
-private:
-  const double dt_;
-  double t_next_;
-  int counter_;
-};
-
-namespace {
-  class MultipleDiagnostics: public DiagnosticFunction
-  {
-  public:
-
-    MultipleDiagnostics(const vector<DiagnosticFunction*>& diag_list):
-      diag_list_(diag_list) {}
-
-    void operator()(const hdsim& sim)
-    {
-      BOOST_FOREACH(DiagnosticFunction* df, diag_list_)
-	{
-	  (*df)(sim);
-	}
-    }
-
-  private:
-    const vector<DiagnosticFunction*> diag_list_;
-  };
-}
 
 namespace {
 
