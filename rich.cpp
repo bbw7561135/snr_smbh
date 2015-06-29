@@ -54,34 +54,12 @@
 #include "calc_init_cond.hpp"
 #include "log_cfl.hpp"
 #include "entropy_fix.hpp"
+#include "edge_length_calculator.hpp"
 
 using namespace std;
 using namespace simulation2d;
 
 namespace {
-
-  class EdgeLengthCalculator: public LazyList<double>
-  {
-  public:
-
-    EdgeLengthCalculator(const Tessellation& tess,
-			 const PhysicalGeometry& pg):
-      tess_(tess), pg_(pg) {}
-
-    size_t size(void) const
-    {
-      return tess_.getAllEdges().size();
-    }
-
-    double operator[](size_t i) const
-    {
-      return pg_.calcArea(tess_.getAllEdges()[i]);
-    }
-
-  private:
-    const Tessellation& tess_;
-    const PhysicalGeometry& pg_;
-  };
 
   bool bracketed(double low, double arg, double high)
   {
