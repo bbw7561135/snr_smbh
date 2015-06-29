@@ -35,26 +35,13 @@
 #include "edge_length_calculator.hpp"
 #include "sim_data.hpp"
 #include "my_main_loop.hpp"
+#include "report_error.hpp"
 
 using namespace std;
-
-namespace {
-  void report_error(UniversalError const& eo)
-  {
-    cout << eo.GetErrorMessage() << endl;
-    cout.precision(14);
-    for(size_t i=0;i<eo.GetFields().size();++i)
-      cout << eo.GetFields()[i] << " = "
-	   << eo.GetValues()[i] << endl;
-  }
-}
 
 int main(void)
 {
   feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
-  //  MPI_Init(NULL, NULL);
-
-  assert(abs(horner(VectorInitialiser<double>(1)(2)(3)(),2)-11)<1e-6);
 
   try{
 
