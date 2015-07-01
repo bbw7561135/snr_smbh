@@ -28,7 +28,7 @@ void my_main_loop(hdsim& sim, const Constants& c)
   Supernova manip(hot_spot,
 		  c.supernova_mass,
 		  c.supernova_energy,
-		  2e4*c.year);
+		  3e4*c.year);
   main_loop(sim, 
 	    term_cond_raw,
 	    &hdsim::TimeAdvance, 
