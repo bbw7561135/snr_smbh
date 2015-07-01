@@ -6,8 +6,12 @@ def plot_single(in_file, zfunc, zname, out_file):
     from matplotlib.collections import PolyCollection
     import matplotlib as mpl
     import matplotlib.pyplot as plt
+    import os
 
     print(out_file)
+    if os.path.isfile(out_file):
+        print 'skipped'
+        return
 
     with h5py.File(in_file,'r+') as f:
         vert_idx_list = numpy.concatenate(([0],
@@ -81,6 +85,9 @@ def y_velocity(f):
     return numpy.array(f['y_velocity'])
 
 def main():
+
+    #import matplotlib
+    #matplotlib.use('Qt4Agg')
 
     import numpy
 
