@@ -6,7 +6,10 @@ def plot_single(in_file, zfunc, zname, out_file):
     from matplotlib.collections import PolyCollection
     import matplotlib as mpl
     import matplotlib.pyplot as plt
+    import os
 
+    if os.path.isfile(out_file):
+        return
     print(out_file)
 
     with h5py.File(in_file,'r+') as f:
@@ -34,6 +37,8 @@ def plot_single(in_file, zfunc, zname, out_file):
             plt.show()
         else:
             plt.savefig(out_file)
+        plt.clf()
+        fig.clf()
 
 def plot_all(zfunc, zname):
 
@@ -82,8 +87,8 @@ def y_velocity(f):
 
 def main():
 
-    #import matplotlib
-    #matplotlib.use('Qt4Agg')
+    import matplotlib
+    matplotlib.use('Agg')
 
     import numpy
 
