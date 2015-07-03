@@ -20,7 +20,7 @@ SimData::SimData(const Constants& c):
   gravity_force_(gravity_acc_),
   geom_force_(pg_.getAxis()),
   wind_(1e-3*c.solar_mass/c.year/(4.*M_PI*pow(0.4*c.parsec,3)/3.),
-	1e3*c.kilo*c.meter/c.second,
+	c.wind_speed,
 	c.boltzmann_constant*1e4/(5./3.-1)/c.proton_mass,
 	0.4*c.parsec),
   force_(VectorInitialiser<SourceTerm*>(&gravity_force_)(&wind_)(&geom_force_)()),

@@ -46,6 +46,7 @@ public:
   const double omega_out;
   const double outer_density_prefactor;
   const double offset;
+  const double wind_speed;
   const double supernova_energy;
   const double supernova_radius;
   const double supernova_volume;
