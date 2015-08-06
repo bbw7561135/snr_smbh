@@ -7,7 +7,7 @@ SimData::SimData(const Constants& c):
 	       (RightRectangle(c.lower_left+Vector2D(0.001,0), c.upper_right),
 		complete_grid(0.1*c.parsec,
 			      abs(c.upper_right-c.lower_left),
-			      0.005*2))),
+			      0.005))),
   tess_(init_points_, outer_),
   eos_(c.adiabatic_index),
   rs_(),
