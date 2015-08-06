@@ -27,7 +27,7 @@ def plot_single(in_file, zfunc, zname, out_file):
                               cmap = mpl.cm.jet,
                               edgecolors = 'none')
         fig, ax = plt.subplots()
-        fig.suptitle(zname+' @ t = '+str(numpy.array(f['time'])[0]))
+        fig.suptitle(zname+' @ t = '+str(int(numpy.array(f['time'])[0])))
         ax.add_collection(coll)
         ax.autoscale_view()
         ax.set_aspect('equal')
@@ -39,6 +39,7 @@ def plot_single(in_file, zfunc, zname, out_file):
             plt.savefig(out_file)
         plt.clf()
         fig.clf()
+        plt.close()
 
 def plot_all(zfunc, zname):
 
