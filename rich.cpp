@@ -1,3 +1,5 @@
+#include <ctime>
+#include <fstream>
 #include "source/newtonian/two_dimensional/hdf5_diagnostics.hpp"
 #include <fenv.h>
 #include "constants.hpp"
@@ -9,6 +11,8 @@ using namespace std;
 
 int main(void)
 {
+  const clock_t begin = clock();
+
   feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 
   try{
@@ -31,6 +35,11 @@ int main(void)
     report_error(eo);
     throw;
   }
+
+  const clock_t end = clock();
+  ofstream f("wall_time.txt");
+  f << static_cast<double>(end-begin)/CLOCKS_PER_SEC << endl;
+  f.close();
 
   return 0;
 }
