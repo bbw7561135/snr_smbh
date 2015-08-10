@@ -13,7 +13,7 @@ using namespace simulation2d;
 
 void my_main_loop(hdsim& sim, const Constants& c)
 {
-  const double tf = 12e3*c.year;
+  const double tf = 20e3*c.year;
   SafeTimeTermination term_cond_raw(tf,1e6);
   MultipleDiagnostics diag
     (VectorInitialiser<DiagnosticFunction*>()

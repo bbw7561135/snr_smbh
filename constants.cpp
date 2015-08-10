@@ -27,7 +27,7 @@ Constants::Constants(void):
   outer_density_prefactor
   (inner_density_prefactor*pow(R_b,omega_out-omega_in)),
   offset(2*parsec),
-  wind_speed(1000*kilo*meter/second),
+  wind_speed(750*kilo*meter/second), // http://adsabs.harvard.edu/abs/2004ApJ...604..662R
   supernova_energy(1e51*erg),
   supernova_radius(0.1*offset),
   supernova_volume((4.*M_PI/3)*pow(supernova_radius,3)),

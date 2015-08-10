@@ -19,10 +19,10 @@ SimData::SimData(const Constants& c):
 	       c.parsec*Vector2D(0,0)),
   gravity_force_(gravity_acc_),
   geom_force_(pg_.getAxis()),
-  wind_(1e-3*c.solar_mass/c.year/(4.*M_PI*pow(0.4*c.parsec,3)/3.),
+  wind_(3e-3*c.solar_mass/c.year/(4.*M_PI*pow(0.4*c.parsec,3)/3.),
 	c.wind_speed,
 	c.boltzmann_constant*1e4/(5./3.-1)/c.proton_mass,
-	0.4*c.parsec),
+	0.4*c.parsec), // http://adsabs.harvard.edu/abs/2004ApJ...604..662R
   force_(VectorInitialiser<SourceTerm*>(&gravity_force_)(&wind_)(&geom_force_)()),
   //    force_(VectorInitializer<SourceTerm*>(&gravity_force_)()),
   tsf_(0.3, "dt_log.txt",c.gravitation_constant*c.black_hole_mass),
