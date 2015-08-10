@@ -15,13 +15,15 @@ def plot_single(in_file, zfunc, zname, out_file):
     with h5py.File(in_file,'r+') as f:
         vert_idx_list = numpy.concatenate(([0],
                                            numpy.cumsum(f['Number of vertices in cell'])))
+        x_verts = numpy.array(f['x position of vertices'])
+        y_verts = numpy.array(f['y position of vertices'])
         verts = []
         for i in range(len(f['density'])):
             lowbound = int(vert_idx_list[i])
             upbound = int(vert_idx_list[i+1])
             verts.append([[x,y] for x,y
-                          in zip(f['x position of vertices'][lowbound:upbound],
-                                 f['y position of vertices'][lowbound:upbound])])
+                          in zip(x_verts[lowbound:upbound],
+                                 y_verts[lowbound:upbound])])
         coll = PolyCollection(verts, 
                               array=zfunc(f),
                               cmap = mpl.cm.jet,
