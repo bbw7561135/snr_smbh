@@ -29,7 +29,7 @@ Constants::Constants(void):
   offset(2*parsec),
   wind_speed(750*kilo*meter/second), // http://adsabs.harvard.edu/abs/2004ApJ...604..662R
   supernova_energy(1e51*erg),
-  supernova_radius(0.1*offset),
+  supernova_radius(0.05*offset),
   supernova_volume((4.*M_PI/3)*pow(supernova_radius,3)),
   supernova_mass(15*solar_mass),
   supernova_density(supernova_mass/supernova_volume),
