@@ -31,7 +31,7 @@ Constants::Constants(void):
   supernova_energy(1e51*erg),
   supernova_radius(0.1*offset),
   supernova_volume((4.*M_PI/3)*pow(supernova_radius,3)),
-  supernova_mass(5*solar_mass),
+  supernova_mass(15*solar_mass),
   supernova_density(supernova_mass/supernova_volume),
   supernova_pressure((adiabatic_index-1)*supernova_energy/supernova_volume),
   lower_left(parsec*Vector2D(0,-10)),
