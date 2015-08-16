@@ -14,7 +14,7 @@ vector<ComputationalCell> calc_init_cond(const Tessellation& tess,
     res[i].velocity = r*c.wind_speed/abs(r);
     res[i].tracers["entropy"] = eos.dp2s
       (res[i].density, res[i].pressure);
-    res[i].stickers["dummy"] = Circle(Vector2D(0,0),0.3*c.parsec)(r);
+    res[i].stickers["dummy"] = Circle(Vector2D(0,0),0.1*c.parsec)(r);
 				      //c.supernova_radius)(r);
   }
   return res;
