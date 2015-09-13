@@ -16,10 +16,6 @@ vector<ComputationalCell> EntropyFix::operator()
     assert(extensives[i].tracers.find("entropy")->second>0);
     if(old[i].stickers.find("dummy")->second)
       continue;
-    /*
-      const double volume = pg.calcVolume
-      (serial_generate(CellEdgesGetter(tess,static_cast<int>(i))));
-    */
     const double volume = cd.volumes[i];
     res[i].density = extensives[i].mass/volume;
     assert(res[i].density>0);
@@ -29,7 +25,7 @@ vector<ComputationalCell> EntropyFix::operator()
       0.5*ScalarProd(res[i].velocity, res[i].velocity);
     const double energy = 
       total_energy - kinetic_energy;
-    for(std::map<std::string,double>::const_iterator it =
+    for(boost::container::flat_map<std::string,double>::const_iterator it =
 	  extensives[i].tracers.begin();
 	it!=extensives[i].tracers.end();++it)
       res[i].tracers[it->first] = it->second/extensives[i].mass;
