@@ -8,6 +8,7 @@
 #include "supernova.hpp"
 #include "source/misc/vector_initialiser.hpp"
 #include "temperature_appendix.hpp"
+#include "wall_time.hpp"
 
 using namespace simulation2d;
 
@@ -22,6 +23,7 @@ void my_main_loop(hdsim& sim, const Constants& c)
 			       vector<DiagnosticAppendix*>
 			       (1,new TemperatureAppendix(c.proton_mass/c.boltzmann_constant))))
      (new WriteTime("time.txt"))
+     (new WallTime("wall_time.txt"))
      (new WriteCycle("cycle.txt"))());
   const Circle hot_spot(Vector2D(0,-c.offset),
 			c.supernova_radius);
