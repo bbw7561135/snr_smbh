@@ -7,7 +7,6 @@
 #include "source/tessellation/tessellation.hpp"
 
 using std::vector;
-using std::map;
 
 class SinkFlux: public FluxCalculator
 {

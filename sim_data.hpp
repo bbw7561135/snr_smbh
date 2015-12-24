@@ -4,7 +4,8 @@
 #include "constants.hpp"
 #include "source/newtonian/two_dimensional/hdsim2d.hpp"
 #include "source/newtonian/two_dimensional/geometric_outer_boundaries/SquareBox.hpp"
-#include "source/tessellation/static_voronoi_mesh.hpp"
+//#include "source/tessellation/static_voronoi_mesh.hpp"
+#include "source/tessellation/VoronoiMesh.hpp"
 #include "source/newtonian/common/ideal_gas.hpp"
 #include "source/newtonian/common/hllc.hpp"
 #include "source/newtonian/two_dimensional/point_motions/eulerian.hpp"
@@ -21,6 +22,7 @@
 #include "source/newtonian/test_2d/clip_grid.hpp"
 #include "source/misc/vector_initialiser.hpp"
 #include "calc_init_cond.hpp"
+#include "source/newtonian/two_dimensional/stationary_box.hpp"
 
 class SimData
 {
@@ -35,12 +37,14 @@ private:
   const CylindricalSymmetry pg_;
   const SquareBox outer_;
   const vector<Vector2D> init_points_;
-  StaticVoronoiMesh tess_;
+  //StaticVoronoiMesh tess_;
+  VoronoiMesh tess_;
   const IdealGas eos_;
   const Hllc rs_;
   //  Lagrangian raw_point_motion_;
   //  RoundCells point_motion_;
   Eulerian alt_point_motion_;
+  const StationaryBox evc_;
   CenterGravity gravity_acc_;
   ConservativeForce gravity_force_;
   CylindricalComplementary geom_force_;

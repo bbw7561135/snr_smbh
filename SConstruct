@@ -22,11 +22,18 @@ elif compiler=='clang++':
 else:
     raise NameError('unsupported compiler')
 
+build_dir = 'build/'+compiler
+if int(debug):
+    build_dir += '/debug'
+else:
+    build_dir += '/release'
 env = Environment(ENV = os.environ,
                   CXX=compiler,
                   CPPPATH=[os.environ['RICH_ROOT']+'/source',
                            os.environ['RICH_ROOT']],
-                  LIBPATH=[os.environ['RICH_ROOT'],'.',os.environ['HDF5_LIB_PATH']],
+                  LIBPATH=[os.environ['RICH_ROOT'],'.',
+                           os.environ['HDF5_LIB_PATH'],
+                           os.environ['RICH_ROOT']+'/'+build_dir],
                   LIBS=['rich','hdf5','hdf5_cpp'],
                   LINKFLAGS=linkflags,
                   CXXFLAGS=cflags)
