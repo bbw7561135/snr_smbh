@@ -1,5 +1,6 @@
 #include <cmath>
 #include "constants.hpp"
+#include "source/misc/simple_io.hpp"
 
 Constants::Constants(void):
   kilo(1e3),
@@ -26,13 +27,17 @@ Constants::Constants(void):
   omega_out(3),
   outer_density_prefactor
   (inner_density_prefactor*pow(R_b,omega_out-omega_in)),
-  offset(0.6*R_b),
-  wind_speed(1000*kilo*meter/second),
+  offset(read_number("offset_pc.txt")*parsec),
+  wind_speed(700*kilo*meter/second),
+  mass_loss_rate
+  (read_number
+   ("mass_loss_rate_mw.txt")*
+   3*3e-3*solar_mass/year/(4*M_PI*pow(0.4*parsec,3))),
   supernova_energy(1e51*erg),
   supernova_radius(0.1*offset),
   supernova_volume((4.*M_PI/3)*pow(supernova_radius,3)),
   supernova_mass(5*solar_mass),
   supernova_density(supernova_mass/supernova_volume),
   supernova_pressure((adiabatic_index-1)*supernova_energy/supernova_volume),
-  lower_left(parsec*Vector2D(0,-50)),
-  upper_right(parsec*Vector2D(50,50)) {}
+  lower_left(parsec*Vector2D(0,-10)),
+  upper_right(parsec*Vector2D(10,10)) {}
