@@ -13,7 +13,7 @@ using namespace simulation2d;
 
 void my_main_loop(hdsim& sim, const Constants& c)
 {
-  const double tf = 50e3*c.year;
+  const double tf = 200e3*c.year;
   SafeTimeTermination term_cond_raw(tf,1e6);
   MultipleDiagnostics diag
     (VectorInitialiser<DiagnosticFunction*>()
@@ -28,7 +28,7 @@ void my_main_loop(hdsim& sim, const Constants& c)
   Supernova manip(hot_spot,
 		  c.supernova_mass,
 		  c.supernova_energy,
-		  3e4*c.year);
+		  180e3*c.year);
   main_loop(sim, 
 	    term_cond_raw,
 	    &hdsim::TimeAdvance, 

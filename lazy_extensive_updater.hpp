@@ -12,12 +12,13 @@ public:
 
   void operator()
   (const vector<Extensive>& fluxes,
-   const PhysicalGeometry& /*pg*/,
+   const PhysicalGeometry& pg,
    const Tessellation& tess,
    const double dt,
    const CacheData& cd,
    const vector<ComputationalCell>& cells,
-   vector<Extensive>& extensives) const;
+   vector<Extensive>& extensives,
+   double time) const;
 
 private:
   const vector<double> lengths_;

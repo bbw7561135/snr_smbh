@@ -20,7 +20,8 @@ void LazyExtensiveUpdater::operator()
    const double dt,
    const CacheData& cd,
    const vector<ComputationalCell>& cells,
-   vector<Extensive>& extensives) const
+   vector<Extensive>& extensives,
+   double /*time*/) const
 {
   const vector<Edge>& edge_list = tess.getAllEdges();
   for(size_t i=0;i<cells.size();++i){
